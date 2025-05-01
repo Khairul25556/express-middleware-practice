@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const ExpressError = require("./ExpressError")
 
 // app.use((req, res, next) => {
 //     console.log("I am a middleware");
@@ -37,10 +38,15 @@ const apiAuth = (req, res, next) => {
         next();
     } else{
         // res.send("ACCESS DENIED");
-        throw new Error("ACCESS DENIED");
+        throw new ExpressError(401, "ACCESS DENIED");
     }
 
 }
+
+app.get("/err", (req, res) => {
+    abcd=abcd;
+});
+
 
 app.get("/api",apiAuth, (req, res) => {
     res.send("data");
@@ -54,10 +60,22 @@ app.get("/random",apiAuth, (req, res) => {
     res.send("This is a random page");
 });
 
-//404
-app.use((req, res) => {
-    res.status(404).send("Page not found");
+app.get("/admin", (req, res) => {
+    throw new ExpressError(403, "Access to admin is forbidden");
 })
+
+app.use((err, req, res, next) => {
+    let {status = 500, message = "Some error occured"} = err;
+    res.status(status).send(message);
+});
+
+//Error Handling
+// app.use((err, req, res, next) => {
+//     console.log("-----------ERROR---------------");
+//     res.send(err);
+// });
+
+
 
 const port = 8080;
 app.listen(port, () => {
